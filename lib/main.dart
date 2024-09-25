@@ -41,7 +41,7 @@ class MyApp extends StatelessWidget {
       // home: FinalprojectProfile(),
       // home: MyWidget(),
       home: FinalprojectLogin(),
-    );
+    );g
   }
 
   // void main() async {
@@ -49,4 +49,5 @@ class MyApp extends StatelessWidget {
   //   await Firebase.initializeApp();
   //   runApp(MyApp());
   // }
+  // bitchoten
 }
