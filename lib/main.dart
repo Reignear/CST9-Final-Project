@@ -1,12 +1,17 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:second_application/FinalProject/FinalProject_Cart.dart';
-import 'package:second_application/FinalProject/FinalProject_Home.dart';
-import 'package:second_application/FinalProject/FinalProject_Login.dart';
-import 'package:second_application/FinalProject/FinalProject_Upcoming.dart';
-import 'package:second_application/FinalProject/Profile.dart';
-import 'package:second_application/FinalProject/FinalProject_API/FinalProject_CallAPIBook.dart';
+import 'package:second_application/FinalProject/FinalProject_FrontEnds/FinalProject_EditBook.dart';
+import 'package:second_application/FinalProject/FinalProject_FrontEnds/FinalProject_Upload.dart';
+import 'package:second_application/FinalProject/FinalProject_FrontEnds/FinalProject_Home(1).dart';
+import 'package:second_application/FinalProject/FinalProject_FrontEnds/FinalProject_HomeFetch.dart';
+import 'package:second_application/FinalProject/useless/FinalProject_Home.dart';
+import 'package:second_application/FinalProject/FinalProject_FrontEnds/FinalProject_Login.dart';
+import 'package:second_application/FinalProject/useless/FinalProject_PopUpAdd.dart';
+import 'package:second_application/FinalProject/FinalProject_FrontEnds/FinalProject_ReadBook.dart';
+import 'package:second_application/FinalProject/FinalProject_FrontEnds/FinalProject_Upcoming.dart';
+import 'package:second_application/FinalProject/useless/Profile.dart';
+import 'package:second_application/listView/itemView.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -37,10 +42,16 @@ class MyApp extends StatelessWidget {
       //home: BookList(),
       // home: FinalprojectUpcoming(),
       // home: FinalProjectHome(),
+      // home: MainPage(),
       // home: FinalprojectCart(),
       // home: FinalprojectProfile(),
       // home: MyWidget(),
       home: FinalprojectLogin(),
+      // home: FinalprojectReadbook(),
+      // home: practice(),
+      // home: ListViewWidget(),
+      // home: Records(),
+      // home: FinalprojectEditbook(),
     );
   }
 

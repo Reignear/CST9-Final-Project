@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:second_application/FinalProject/FinalProject_UI_Methods.dart';
+import 'package:second_application/Component/Project_DesignComponent.dart';
+import 'package:second_application/FinalProject/useless/FinalProject_UI_Methods.dart';
 
 class FinalprojectUpcoming extends StatefulWidget {
   const FinalprojectUpcoming({super.key});
@@ -13,8 +14,8 @@ class _MyWidgetState extends State<FinalprojectUpcoming> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      appBar: customAppBar(context),
-      drawer: customDrawer(context),
+      appBar: navigation(showAddBoolBTN: false).AppBarWidget(context),
+      drawer: navigation(showAddBoolBTN: false).drawerWidget(context),
       body: ListView(
         children: [
           Container(

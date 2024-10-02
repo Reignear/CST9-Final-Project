@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:second_application/FinalProject/FinalProject_Backends/FinalProject_FireStoreService.dart';
 import 'package:second_application/FinalProject/FinalProject_Backends/FinalProject_RegistrationAuthentication.dart';
 import 'package:second_application/FinalProject/FinalProject_Backends/FinalProject_LoginAuthentication.dart';
-import 'package:second_application/FinalProject/FinalProject_Home.dart';
+import 'package:second_application/FinalProject/FinalProject_FrontEnds/FinalProject_Home(1).dart';
+import 'package:second_application/FinalProject/useless/FinalProject_Home.dart';
 
 class FinalprojectLogin extends StatefulWidget {
   const FinalprojectLogin({super.key});
@@ -11,12 +13,14 @@ class FinalprojectLogin extends StatefulWidget {
 }
 
 class _FinalprojectLoginState extends State<FinalprojectLogin> {
+  //try
   final Registration_Authentication = AuthService();
   final Login_Authentication = LoginService();
 
   final _login_email_controller = TextEditingController();
   final _login_password_controller = TextEditingController();
 
+  final _registration_name = TextEditingController();
   final _register_email = TextEditingController();
   final _register_password = TextEditingController();
 
@@ -25,6 +29,8 @@ class _FinalprojectLoginState extends State<FinalprojectLogin> {
     super.dispose();
     _login_email_controller.dispose();
     _login_password_controller.dispose();
+    _register_email.dispose();
+    _register_password.dispose();
   }
 
   @override
@@ -172,9 +178,10 @@ class _FinalprojectLoginState extends State<FinalprojectLogin> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                const TextField(
-                  style: TextStyle(color: Colors.white),
-                  decoration: InputDecoration(
+                TextField(
+                  controller: _registration_name,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(
                     labelText: 'Full Name',
                     labelStyle: TextStyle(color: Colors.white),
                     enabledBorder: OutlineInputBorder(
@@ -360,35 +367,43 @@ class _FinalprojectLoginState extends State<FinalprojectLogin> {
     );
   }
 
+  _logIn() async {
+    try {
+      final loginUser = await LoginService.loginUserWithEmailAndPassword(
+          _login_email_controller.text, _login_password_controller.text);
+
+      if (loginUser != null) {
+        print("User ID: ${loginUser.uid}");
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => MainPage()),
+        );
+      } else {
+        _showLoginUnsuccessModal(context);
+        return false;
+      }
+    } catch (e) {
+      print("Login error: $e");
+      _showLoginUnsuccessModal(context);
+    }
+  }
+
   _signUp() async {
     if (_register_email.text.isEmpty || _register_password.text.isEmpty) {
       _showRegistrationIncompleteModal(context);
       return;
     }
-
     final registerUser =
         await Registration_Authentication.createUserWithEmailAndPassword(
-            _register_email.text, _register_password.text);
+      _register_email.text,
+      _register_password.text,
+      _registration_name.text,
+    );
 
     if (registerUser != null) {
       _showRegistrationSuccessModal(context);
     } else {
       _showRegistrationUnsuccessModal(context);
-    }
-  }
-
-  _logIn() async {
-    final loginUser = await Login_Authentication.loginUserWithEmailAndPassword(
-        _login_email_controller.text, _login_password_controller.text);
-
-    if (loginUser != null) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => FinalProjectHome()),
-      );
-    } else {
-      _showLoginUnsuccessModal(context);
-      return false;
     }
   }
 }

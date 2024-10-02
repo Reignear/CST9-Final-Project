@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:second_application/FinalProject/FinalProject_UI_Methods.dart';
+import 'package:second_application/Component/Project_DesignComponent.dart';
+import 'package:second_application/FinalProject/useless/FinalProject_UI_Methods.dart';
 
-class FinalprojectDownload extends StatefulWidget {
-  const FinalprojectDownload({super.key});
+class FinalprojectFavorite extends StatefulWidget {
+  const FinalprojectFavorite({super.key});
 
   @override
-  State<FinalprojectDownload> createState() => _MyWidgetState();
+  State<FinalprojectFavorite> createState() => _MyWidgetState();
 }
 
-class _MyWidgetState extends State<FinalprojectDownload> {
+class _MyWidgetState extends State<FinalprojectFavorite> {
   final List<Map<String, String>> cartItems = [
     {
       "title": "Love Next Door",
@@ -22,19 +23,19 @@ class _MyWidgetState extends State<FinalprojectDownload> {
     },
   ];
 
-  late List<bool> _checkedStates;
+  // late List<bool> _checkedStates;
 
-  @override
-  void initState() {
-    super.initState();
-    _checkedStates = List.generate(cartItems.length, (index) => false);
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  //   _checkedStates = List.generate(cartItems.length, (index) => false);
+  // }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: customAppBar(context),
-      drawer: customDrawer(context),
+      appBar: navigation(showAddBoolBTN: false).AppBarWidget(context),
+      drawer: navigation(showAddBoolBTN: false).drawerWidget(context),
       backgroundColor: Colors.black,
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -115,6 +116,10 @@ class _MyWidgetState extends State<FinalprojectDownload> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
+                Icon(
+                  Icons.favorite,
+                  color: Colors.red,
+                ),
                 TextButton(
                   onPressed: () {
                     print('Read $title');
@@ -122,15 +127,6 @@ class _MyWidgetState extends State<FinalprojectDownload> {
                   child: const Text(
                     'Read',
                     style: TextStyle(color: Colors.blue),
-                  ),
-                ),
-                TextButton(
-                  onPressed: () {
-                    print('Delete $title');
-                  },
-                  child: const Text(
-                    'Delete',
-                    style: TextStyle(color: Colors.red),
                   ),
                 ),
               ],
