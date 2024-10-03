@@ -5,10 +5,12 @@ class FinalprojectReadbook extends StatelessWidget {
   final String bookTitle;
   final String bookAuthor;
   final String bookStory;
+  final String bookUrl;
   FinalprojectReadbook({
     required this.bookTitle,
     required this.bookAuthor,
     required this.bookStory,
+    required this.bookUrl,
   });
 
   @override
@@ -25,23 +27,20 @@ class FinalprojectReadbook extends StatelessWidget {
                   width: 150,
                   height: 200,
                   margin: const EdgeInsets.fromLTRB(0, 20, 0, 20),
-                  child: const Image(
-                    image: AssetImage('assets/Books.gif'),
-                    fit: BoxFit.cover,
-                  ),
+                  child: Image.network(bookUrl),
                 ),
               ),
               Text(
                 bookTitle,
                 style: GoogleFonts.gowunBatang(
                     fontWeight: FontWeight.bold, fontSize: 20),
-                textAlign: TextAlign.justify,
+                textAlign: TextAlign.center,
               ),
               Text(
                 bookAuthor,
                 style: GoogleFonts.gowunBatang(
                     fontWeight: FontWeight.w800, fontSize: 15),
-                textAlign: TextAlign.justify,
+                textAlign: TextAlign.center,
               ),
               SizedBox(
                 height: 50,
@@ -56,7 +55,7 @@ class FinalprojectReadbook extends StatelessWidget {
                     style: GoogleFonts.gowunBatang(
                       fontWeight: FontWeight.w700,
                     ),
-                    textAlign: TextAlign.justify,
+                    textAlign: TextAlign.center,
                   ),
                 ),
               ),

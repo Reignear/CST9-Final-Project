@@ -23,14 +23,6 @@ class _MyWidgetState extends State<FinalprojectFavorite> {
     },
   ];
 
-  // late List<bool> _checkedStates;
-
-  // @override
-  // void initState() {
-  //   super.initState();
-  //   _checkedStates = List.generate(cartItems.length, (index) => false);
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(

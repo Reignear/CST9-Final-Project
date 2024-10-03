@@ -98,6 +98,7 @@ class _MyWidgetState extends State<FinalprojectUpload> {
 
   @override
   Widget build(BuildContext context) {
+    fetchUserUploadedBooks();
     return Scaffold(
       appBar: navigation(showAddBoolBTN: false).AppBarWidget(context),
       drawer: navigation(showAddBoolBTN: false).drawerWidget(context),
@@ -135,7 +136,7 @@ class _MyWidgetState extends State<FinalprojectUpload> {
                   int index = entry.key;
                   var item = entry.value;
                   return buildDownloadItem(item['bookTitle']!,
-                      item['bookDescription']!, item['imageUrl']!, index);
+                      item['bookAuthor']!, item['imageUrl']!, index);
                 }).toList(),
                 const SizedBox(height: 20),
               ],
@@ -178,8 +179,8 @@ class _MyWidgetState extends State<FinalprojectUpload> {
         children: [
           TextButton(
             onPressed: () {
-              final String documentId = uploadItems[index]['documentId'] ??
-                  "unknown_id"; // Fallback if null
+              final String documentId =
+                  uploadItems[index]['documentId'] ?? "unknown_id";
               final String bookTitle =
                   uploadItems[index]['bookTitle'] ?? "No Title";
               final String bookAuthor =
@@ -196,6 +197,7 @@ class _MyWidgetState extends State<FinalprojectUpload> {
                   editAuthor: bookAuthor,
                   editDescription: bookDescription,
                   editStory: bookStory,
+                  editImage: imageUrl,
                 ),
               ));
             },

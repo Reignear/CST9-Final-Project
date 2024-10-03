@@ -1,4 +1,7 @@
+import 'dart:typed_data';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:second_application/Component/Project_AddBookComponent.dart';
@@ -74,9 +77,11 @@ class navigation extends StatelessWidget {
                 .get(),
             builder: (context, snapshot) {
               String userName = 'Loading...';
+              String userProfile = '';
               if (snapshot.connectionState == ConnectionState.done) {
                 if (snapshot.hasData && snapshot.data!.exists) {
                   userName = snapshot.data!['name'] ?? 'No Name';
+                  // userProfile = snapshot.data!['profileUrl'] ?? 'No image';
                 } else {
                   userName = 'User not found';
                 }
@@ -84,11 +89,38 @@ class navigation extends StatelessWidget {
 
               return DrawerHeader(
                 decoration: const BoxDecoration(color: Colors.black),
-                child: Center(
-                  child: Text(
-                    userName,
-                    style: const TextStyle(color: Colors.red, fontSize: 24),
-                  ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Stack(
+                      children: [
+                        CircleAvatar(
+                          radius: 30,
+                          backgroundImage: NetworkImage(
+                              'https://png.pngtree.com/png-clipart/20230913/original/pngtree-profile-picture-png-image_11063391.png'),
+                          backgroundColor: Colors.white,
+                        ),
+                        Positioned(
+                          bottom: -8,
+                          right: -8,
+                          child: CircleAvatar(
+                            radius: 15,
+                            backgroundColor: Colors.transparent,
+                            child: Icon(
+                              Icons.camera_alt,
+                              size: 12,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16),
+                    Text(
+                      userName,
+                      style: const TextStyle(color: Colors.red, fontSize: 18),
+                    ),
+                  ],
                 ),
               );
             },

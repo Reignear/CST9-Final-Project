@@ -67,6 +67,13 @@ class _MyWidgetState extends State<ProjectAddbookcomponent> {
 
       setState(() {
         Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(
+            'Book added successfully!',
+            textAlign: TextAlign.center,
+          )),
+        );
       });
     } catch (e) {
       print("Error occurred while uploading data: $e");

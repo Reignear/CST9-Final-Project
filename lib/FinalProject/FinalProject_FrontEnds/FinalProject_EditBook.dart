@@ -1,6 +1,9 @@
+import 'dart:typed_data';
+import 'dart:io';
+import 'package:file_picker/file_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
-import 'package:second_application/Component/Project_DesignComponent.dart';
-import 'package:second_application/FinalProject/FinalProject_FrontEnds/FinalProject_Upload.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FinalprojectEditbook extends StatefulWidget {
@@ -9,6 +12,7 @@ class FinalprojectEditbook extends StatefulWidget {
   final String editAuthor;
   final String editDescription;
   final String editStory;
+  final String editImage;
 
   const FinalprojectEditbook({
     Key? key,
@@ -17,6 +21,7 @@ class FinalprojectEditbook extends StatefulWidget {
     required this.editAuthor,
     required this.editDescription,
     required this.editStory,
+    required this.editImage,
   }) : super(key: key);
 
   @override
@@ -28,6 +33,9 @@ class _FinalprojectEditbookState extends State<FinalprojectEditbook> {
   late TextEditingController _authorController;
   late TextEditingController _descriptionController;
   late TextEditingController _storyController;
+
+  PlatformFile? pickedFile;
+  Uint8List? imageBytes;
 
   @override
   void initState() {
@@ -48,59 +56,109 @@ class _FinalprojectEditbookState extends State<FinalprojectEditbook> {
     super.dispose();
   }
 
-  void _updateBook() async {
-    String updatedTitle = _titleController.text.trim();
-    String updatedAuthor = _authorController.text.trim();
-    String updatedDescription = _descriptionController.text.trim();
-    String updatedStory = _storyController.text.trim();
+  Future<void> uploadFile() async {
+    // Check if the required fields are filled
+    String bookTitle = _titleController.text.trim();
+    String bookAuthor = _authorController.text.trim();
+    String bookDescription = _descriptionController.text.trim();
+    String bookStory = _storyController.text.trim();
 
-    setState(() {
-      // Navigator.pop(context, {
-      //   'bookTitle': updatedTitle,
-      //   'bookAuthor': updatedAuthor,
-      //   'bookDescription': updatedDescription,
-      //   'bookStory': updatedStory,
-      // });
-    });
-    if (updatedTitle.isEmpty ||
-        updatedAuthor.isEmpty ||
-        updatedDescription.isEmpty ||
-        updatedStory.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please fill in all fields.')),
-      );
+    if (bookTitle.isEmpty ||
+        bookAuthor.isEmpty ||
+        bookDescription.isEmpty ||
+        bookStory.isEmpty) {
+      print("One or more book fields are empty");
       return;
     }
 
+    // Get the current user
+    User? user = FirebaseAuth.instance.currentUser;
+
+    if (user == null) {
+      print('User not logged in');
+      return;
+    }
+
+    String filePath = 'images/${user.uid}/${pickedFile!.name}';
+    Reference storageRef = FirebaseStorage.instance.ref().child(filePath);
+
     try {
+      // Upload the image bytes to Firebase Storage
+      await storageRef.putData(imageBytes!);
+      print("Image Upload successful");
+      String downloadURL = await storageRef.getDownloadURL();
+
+      // Prepare the data for Firestore
+      Map<String, dynamic> data = {
+        'userId': user.uid,
+        'bookTitle': bookTitle,
+        'bookAuthor': bookAuthor,
+        'bookDescription': bookDescription,
+        'bookStory': bookStory,
+        'filePath': filePath,
+        'imageUrl': downloadURL,
+      };
+
+      // Update the Firestore document
       await FirebaseFirestore.instance
           .collection('books')
           .doc(widget.documentId)
-          .update({
-        'bookTitle': updatedTitle,
-        'bookAuthor': updatedAuthor,
-        'bookDescription': updatedDescription,
-        'bookStory': updatedStory,
+          .update(data);
+
+      print("Data Update successful");
+      setState(() {
+        Navigator.of(context).pop();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+              content: Text(
+            'Book updated successfully!',
+            textAlign: TextAlign.center,
+          )),
+        );
       });
-
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Book updated successfully.')),
-      );
-
-      Navigator.pop(context);
     } catch (e) {
-      print('Error updating book: $e');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error updating book: $e')),
-      );
+      print("Error occurred while uploading data: $e");
+    }
+  }
+
+  void _pickImage() async {
+    FilePickerResult? result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+    );
+
+    if (result != null) {
+      pickedFile = result.files.first;
+
+      if (pickedFile!.bytes != null) {
+        imageBytes = pickedFile!.bytes;
+        print("Picked file name: ${pickedFile!.name}");
+        print("Image bytes length: ${imageBytes?.length}");
+        setState(() {});
+      } else if (pickedFile!.path != null) {
+        File file = File(pickedFile!.path!);
+        try {
+          imageBytes = await file.readAsBytes();
+          print("Picked file path: ${pickedFile?.path}");
+          print("Image bytes length: ${imageBytes?.length}");
+          setState(() {});
+        } catch (e) {
+          print("Error reading image bytes: $e");
+        }
+      } else {
+        print('No valid file selected');
+      }
+    } else {
+      print('No file selected');
     }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: navigation(showAddBoolBTN: false).AppBarWidget(context),
-      drawer: navigation(showAddBoolBTN: false).drawerWidget(context),
+      appBar: AppBar(
+        title: Text('Edit Book'),
+        actions: [IconButton(onPressed: uploadFile, icon: Icon(Icons.save))],
+      ),
       body: _editBookBody(context),
     );
   }
@@ -128,9 +186,15 @@ class _FinalprojectEditbookState extends State<FinalprojectEditbook> {
             decoration: BoxDecoration(
               border: Border.all(color: Colors.black, width: 2.0),
             ),
+            child: imageBytes != null
+                ? Image.memory(
+                    imageBytes!,
+                    fit: BoxFit.cover,
+                  )
+                : Image.network(widget.editImage),
           ),
           IconButton(
-            onPressed: () {},
+            onPressed: _pickImage,
             icon: Icon(
               Icons.camera_alt,
               color: Colors.red,
@@ -173,7 +237,7 @@ class _FinalprojectEditbookState extends State<FinalprojectEditbook> {
               SizedBox(
                 width: 100,
                 child: TextButton(
-                  onPressed: _updateBook,
+                  onPressed: uploadFile,
                   child: const Text(
                     'Save',
                     style: TextStyle(fontSize: 16, color: Colors.white),
@@ -191,7 +255,7 @@ class _FinalprojectEditbookState extends State<FinalprojectEditbook> {
                 width: 100,
                 child: TextButton(
                   onPressed: () {
-                    Navigator.pop(context); // Go back to the previous screen
+                    Navigator.pop(context);
                   },
                   child: const Text(
                     'Cancel',
