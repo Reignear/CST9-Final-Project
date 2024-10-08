@@ -1,7 +1,4 @@
-import 'dart:typed_data';
-
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:second_application/Component/Project_AddBookComponent.dart';
@@ -76,14 +73,13 @@ class navigation extends StatelessWidget {
                 .doc(currentUser?.uid)
                 .get(),
             builder: (context, snapshot) {
-              String userName = 'Loading...';
-              String userProfile = '';
+              String userName = 'User not found!';
+
               if (snapshot.connectionState == ConnectionState.done) {
                 if (snapshot.hasData && snapshot.data!.exists) {
                   userName = snapshot.data!['name'] ?? 'No Name';
-                  // userProfile = snapshot.data!['profileUrl'] ?? 'No image';
                 } else {
-                  userName = 'User not found';
+                  userName = 'User not found!';
                 }
               }
 
@@ -97,7 +93,7 @@ class navigation extends StatelessWidget {
                         CircleAvatar(
                           radius: 30,
                           backgroundImage: NetworkImage(
-                              'https://png.pngtree.com/png-clipart/20230913/original/pngtree-profile-picture-png-image_11063391.png'),
+                              'https://play-lh.googleusercontent.com/WlUHWEdlhv_OrcgdY1KdLLHT3VWVyYkE41brvhpRr-o9vo9Y9o2ss9rH_WOkaML_4g'),
                           backgroundColor: Colors.white,
                         ),
                         Positioned(
@@ -140,16 +136,45 @@ class navigation extends StatelessWidget {
             title: const Text('Log Out', style: TextStyle(color: Colors.white)),
             onTap: () async {
               if (currentUser != null) {
-                print("Signed out User ID: ${currentUser.uid}");
-              } else {
-                print("No user is currently signed in.");
+                final shouldSignOut = await showDialog<bool>(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: Text(
+                        'Sign out confirmation',
+                        style: TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      content: Text('Are you sure you want to sign out?'),
+                      actions: <Widget>[
+                        TextButton(
+                          style: TextButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              backgroundColor: Colors.red),
+                          onPressed: () => Navigator.of(context).pop(false),
+                          child: Text('Cancel'),
+                        ),
+                        TextButton(
+                          style: TextButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              backgroundColor: Colors.red),
+                          onPressed: () => Navigator.of(context).pop(true),
+                          child: Text('Sign Out'),
+                        ),
+                      ],
+                    );
+                  },
+                );
+
+                if (shouldSignOut == true) {
+                  // ignore: await_only_futures
+                  await SignOut();
+                  Navigator.of(context).pushAndRemoveUntil(
+                    MaterialPageRoute(
+                        builder: (context) => const FinalprojectLogin()),
+                    (route) => false,
+                  );
+                } else {}
               }
-              await SignOut();
-              Navigator.of(context).pushAndRemoveUntil(
-                MaterialPageRoute(
-                    builder: (context) => const FinalprojectLogin()),
-                (route) => false,
-              );
             },
           ),
         ],

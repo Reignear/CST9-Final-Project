@@ -1,8 +1,10 @@
+// ignore_for_file: use_build_context_synchronously
+
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:second_application/FinalProject/FinalProject_Backends/FinalProject_FireStoreService.dart';
-import 'package:second_application/FinalProject/FinalProject_Backends/FinalProject_RegistrationAuthentication.dart';
 import 'package:second_application/FinalProject/FinalProject_FrontEnds/FinalProject_ReadBook.dart';
 
 class ProjectHomeComponent extends StatefulWidget {
@@ -26,7 +28,7 @@ class _ProjectHomeComponentState extends State<ProjectHomeComponent> {
     fetchBooks();
   }
 
-  // Displaying books in a grid format
+  // Displaying books in a grid format hahahaha
   Widget displayBooks() {
     return StreamBuilder<QuerySnapshot>(
       stream: bookStream,
@@ -105,147 +107,288 @@ class _ProjectHomeComponentState extends State<ProjectHomeComponent> {
   }
 
   void _showBookDialog(BuildContext context, Map<String, dynamic> bookData) {
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(5.0),
-          ),
-          child: Container(
-            height: 500,
-            width: 400,
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Center(
-                          child: Container(
-                              width: 150,
-                              height: 180,
-                              child: Image.network(bookData['imageUrl'])),
-                        ),
-                        Center(
-                          child: Text(
-                            bookData['bookTitle'],
-                            style: GoogleFonts.gowunBatang(
-                              fontWeight: FontWeight.normal,
-                              fontSize: 22,
+    User? user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      final favoritesStream = FirebaseFirestore.instance
+          .collection('favorites')
+          .where('fav_userId', isEqualTo: user.uid)
+          .where('fav_bookID', isEqualTo: bookData['bookID'])
+          .snapshots();
+      showDialog(
+        context: context,
+        builder: (BuildContext context) {
+          return StreamBuilder<QuerySnapshot>(
+            stream: favoritesStream,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              }
+
+              bool isFavorite =
+                  snapshot.hasData && snapshot.data!.docs.isNotEmpty;
+
+              return _showDialog(context, bookData, isFavorite);
+            },
+          );
+        },
+      );
+    } else {
+      _showDialog(context, bookData, false);
+    }
+  }
+
+  Widget _showDialog(
+      BuildContext context, Map<String, dynamic> bookData, bool isFavorite) {
+    return Dialog(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(5.0),
+      ),
+      child: Container(
+        height: 500,
+        width: 400,
+        decoration: BoxDecoration(
+          color: Colors.black,
+          border: Border.all(color: Colors.red),
+          borderRadius: BorderRadius.circular(5),
+        ),
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.end,
+          children: [
+            GestureDetector(
+              onTap: () async {
+                User? user = FirebaseAuth.instance.currentUser;
+                if (user != null) {
+                  String userId = user.uid;
+
+                  try {
+                    if (!isFavorite) {
+                      await FirebaseFirestore.instance
+                          .collection('favorites')
+                          .add({
+                        'fav_userId': userId,
+                        'fav_bookID': bookData['bookID'],
+                        'fav_bookTitle': bookData['bookTitle'],
+                        'fav_bookAuthor': bookData['bookAuthor'],
+                        'fav_bookDescription': bookData['bookDescription'],
+                        'fav_bookStory': bookData['bookStory'],
+                        'fav_filePath': bookData['filePath'],
+                        'fav_imageUrl': bookData['imageUrl'],
+                        'fav_bookUploader': bookData['userId'],
+                      });
+
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content: Center(child: Text('Added to Favorites'))),
+                      );
+                    } else {
+                      QuerySnapshot querySnapshot = await FirebaseFirestore
+                          .instance
+                          .collection('favorites')
+                          .where('fav_userId', isEqualTo: userId)
+                          .where('fav_bookID', isEqualTo: bookData['bookID'])
+                          .get();
+
+                      for (var doc in querySnapshot.docs) {
+                        await doc.reference.delete();
+                      }
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                            content:
+                                Center(child: Text('Removed from Favorites'))),
+                      );
+                    }
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                          content: Center(
+                              child: Text('Failed to toggle favorite: $e'))),
+                    );
+                  }
+                }
+              },
+              child: Icon(
+                isFavorite ? Icons.favorite : Icons.favorite_border,
+                color: isFavorite ? Colors.red : Colors.white,
+              ),
+            ),
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Center(
+                      child: Container(
+                          width: 130,
+                          height: 180,
+                          decoration: BoxDecoration(color: Colors.white),
+                          child: Image.network(
+                            bookData['imageUrl'],
+                            fit: BoxFit.cover,
+                          )),
+                    ),
+                    SizedBox(height: 10),
+                    Center(
+                      child: Text(
+                        bookData['bookTitle'],
+                        style: GoogleFonts.gowunBatang(
+                            fontWeight: FontWeight.normal,
+                            fontSize: 22,
+                            color: Colors.white),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Center(
+                      child: Text(
+                        bookData['bookAuthor'],
+                        style: GoogleFonts.gowunBatang(
+                            fontWeight: FontWeight.normal,
+                            fontSize: 18,
+                            color: Colors.white),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Center(
+                      child: Text(
+                        bookData['bookDescription'],
+                        style: GoogleFonts.gowunBatang(
+                            fontWeight: FontWeight.normal,
+                            fontSize: 16,
+                            color: Colors.white),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 16),
+            Center(
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const SizedBox(width: 8),
+                  Container(
+                    width: 100,
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (context) => FinalprojectReadbook(
+                              bookTitle: bookData['bookTitle'],
+                              bookAuthor: bookData['bookAuthor'],
+                              bookStory: bookData['bookStory'],
+                              bookUrl: bookData['imageUrl'],
                             ),
-                            textAlign: TextAlign.center,
                           ),
+                        );
+                      },
+                      child: const Text(
+                        'Read',
+                        style: TextStyle(fontSize: 13, color: Colors.white),
+                      ),
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
                         ),
-                        const SizedBox(height: 5),
-                        Center(
-                          child: Text(
-                            bookData['bookAuthor'],
-                            style: GoogleFonts.gowunBatang(
-                              fontWeight: FontWeight.normal,
-                              fontSize: 18,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        const SizedBox(height: 5),
-                        Center(
-                          child: Text(
-                            bookData['bookDescription'],
-                            style: GoogleFonts.gowunBatang(
-                              fontWeight: FontWeight.normal,
-                              fontSize: 16,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        const SizedBox(height: 5),
-                      ],
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: 16),
-                Center(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      Container(
-                        width: 100,
-                        child: TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            Navigator.of(context).push(
-                              MaterialPageRoute(
-                                builder: (context) => FinalprojectReadbook(
-                                  bookTitle: bookData['bookTitle'],
-                                  bookAuthor: bookData['bookAuthor'],
-                                  bookStory: bookData['bookStory'],
-                                  bookUrl: bookData['imageUrl'],
-                                ),
-                              ),
+                  const SizedBox(width: 8),
+                  Container(
+                    width: 100,
+                    child: TextButton(
+                      onPressed: () async {
+                        User? user = FirebaseAuth.instance.currentUser;
+                        if (user != null) {
+                          String userId = user.uid;
+                          try {
+                            var querySnapshot = await FirebaseFirestore.instance
+                                .collection('downloads')
+                                .where('download_userId', isEqualTo: userId)
+                                .where('download_bookID',
+                                    isEqualTo: bookData['bookID'])
+                                .get();
+
+                            if (querySnapshot.docs.isNotEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content: Center(
+                                        child: Text(
+                                            'This book is already downloaded'))),
+                              );
+                            } else {
+                              await FirebaseFirestore.instance
+                                  .collection('downloads')
+                                  .add({
+                                'download_userId': userId,
+                                'download_bookID': bookData['bookID'],
+                                'download_bookTitle': bookData['bookTitle'],
+                                'download_bookAuthor': bookData['bookAuthor'],
+                                'download_bookDescription':
+                                    bookData['bookDescription'],
+                                'download_bookStory': bookData['bookStory'],
+                                'download_filePath': bookData['filePath'],
+                                'download_imageUrl': bookData['imageUrl'],
+                                'download_bookUploader': bookData['userId'],
+                              });
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content: Center(
+                                        child: Text('Added to Downloads'))),
+                              );
+                            }
+                          } catch (e) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content: Center(
+                                      child: Text(
+                                          'Failed to toggle favorite: $e'))),
                             );
-                          },
-                          child: const Text(
-                            'Read',
-                            style: TextStyle(fontSize: 13, color: Colors.white),
-                          ),
-                          style: TextButton.styleFrom(
-                            backgroundColor: Colors.red,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                          ),
+                          }
+                        }
+                      },
+                      child: const Text('Download',
+                          style: TextStyle(fontSize: 13, color: Colors.white)),
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
                         ),
                       ),
-                      const SizedBox(width: 8),
-                      Container(
-                        width: 100,
-                        child: TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                            // Add download functionality here
-                          },
-                          child: const Text('Download',
-                              style:
-                                  TextStyle(fontSize: 13, color: Colors.white)),
-                          style: TextButton.styleFrom(
-                            backgroundColor: Colors.red,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Container(
-                        width: 100,
-                        child: TextButton(
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                          child: const Text(
-                            'Cancel',
-                            style: TextStyle(fontSize: 13, color: Colors.white),
-                          ),
-                          style: TextButton.styleFrom(
-                            backgroundColor: Colors.red,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(4),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
+                    ),
                   ),
-                ),
-              ],
+                  const SizedBox(width: 8),
+                  Container(
+                    width: 100,
+                    child: TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                      child: const Text(
+                        'Cancel',
+                        style: TextStyle(fontSize: 13, color: Colors.white),
+                      ),
+                      style: TextButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        );
-      },
+          ],
+        ),
+      ),
     );
   }
 

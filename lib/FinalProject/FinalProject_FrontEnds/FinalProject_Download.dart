@@ -1,7 +1,8 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:second_application/Component/Project_DesignComponent.dart';
 import 'package:second_application/FinalProject/FinalProject_FrontEnds/FinalProject_ReadBook.dart';
-import 'package:second_application/FinalProject/useless/FinalProject_UI_Methods.dart';
 
 class FinalprojectDownload extends StatefulWidget {
   const FinalprojectDownload({super.key});
@@ -11,26 +12,10 @@ class FinalprojectDownload extends StatefulWidget {
 }
 
 class _MyWidgetState extends State<FinalprojectDownload> {
-  final List<Map<String, String>> cartItems = [
-    {
-      "title": "Love Next Door",
-      "details": "7 Episodes | 5.1 GB",
-      "image": "pavola.jpg",
-    },
-    {
-      "title": "How to Make Millions Before",
-      "details": "1.1 GB",
-      "image": "image.jpg",
-    },
-  ];
+  final CollectionReference _booksCollection =
+      FirebaseFirestore.instance.collection('downloads');
 
-  late List<bool> _checkedStates;
-
-  @override
-  void initState() {
-    super.initState();
-    _checkedStates = List.generate(cartItems.length, (index) => false);
-  }
+  final String userId = FirebaseAuth.instance.currentUser?.uid ?? '';
 
   @override
   Widget build(BuildContext context) {
@@ -51,22 +36,55 @@ class _MyWidgetState extends State<FinalprojectDownload> {
                 fontWeight: FontWeight.bold,
               ),
             ),
+            SizedBox(
+              height: 15,
+            ),
             Expanded(
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  crossAxisSpacing: 16.0,
-                  mainAxisSpacing: 16.0,
-                  childAspectRatio: 0.7,
-                ),
-                itemCount: cartItems.length,
-                itemBuilder: (context, index) {
-                  var item = cartItems[index];
-                  return buildDownloadGridItem(
-                    item['title']!,
-                    item['details']!,
-                    item['image']!,
-                    index,
+              child: StreamBuilder<QuerySnapshot>(
+                stream: _booksCollection
+                    .where('download_userId', isEqualTo: userId)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
+
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  }
+
+                  final downloadbooks = snapshot.data?.docs;
+                  if (downloadbooks == null || downloadbooks.isEmpty) {
+                    return const Center(
+                        child: Text(
+                      'No books available.',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ));
+                  }
+
+                  return GridView.builder(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 16.0,
+                      mainAxisSpacing: 16.0,
+                      childAspectRatio: 0.7,
+                    ),
+                    itemCount: downloadbooks.length,
+                    itemBuilder: (context, index) {
+                      var item =
+                          downloadbooks[index].data() as Map<String, dynamic>;
+                      var docId = downloadbooks[index].id;
+
+                      return buildDownloadGridItem(
+                        title: item['download_bookTitle'] ?? 'No Title',
+                        details: item['download_bookAuthor'] ?? 'No Details',
+                        story: item['download_bookStory'] ?? 'No Story',
+                        imageUrl:
+                            item['download_imageUrl'] ?? 'default_image.jpg',
+                        docId: docId,
+                      );
+                    },
                   );
                 },
               ),
@@ -77,8 +95,13 @@ class _MyWidgetState extends State<FinalprojectDownload> {
     );
   }
 
-  Widget buildDownloadGridItem(
-      String title, String details, String imageUrl, int index) {
+  Widget buildDownloadGridItem({
+    required String title,
+    required String details,
+    required String imageUrl,
+    required String docId,
+    required String story,
+  }) {
     return Card(
       color: Colors.grey[900],
       child: Padding(
@@ -88,17 +111,18 @@ class _MyWidgetState extends State<FinalprojectDownload> {
           children: [
             Container(
               height: 150,
-              child: Center(
-                child: Image.asset(
-                  imageUrl,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      color: Colors.grey,
-                      child: const Icon(Icons.error, color: Colors.white),
-                    );
-                  },
-                ),
+              width: double.infinity,
+              child: Image.network(
+                imageUrl,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) {
+                  return Container(
+                    color: Colors.grey,
+                    width: double.infinity,
+                    child: const Icon(Icons.error, color: Colors.white),
+                  );
+                },
               ),
             ),
             const SizedBox(height: 10),
@@ -119,12 +143,13 @@ class _MyWidgetState extends State<FinalprojectDownload> {
               children: [
                 TextButton(
                   onPressed: () {
-                    print('Read $title');
-                    // Navigator.of(context).push(
-                    // MaterialPageRoute(
-                    //   builder: (context) => FinalprojectReadbook(),
-                    // ),
-                    // );
+                    Navigator.of(context).push(MaterialPageRoute(
+                        builder: (context) => FinalprojectReadbook(
+                              bookTitle: title,
+                              bookAuthor: details,
+                              bookStory: story,
+                              bookUrl: imageUrl,
+                            )));
                   },
                   child: const Text(
                     'Read',
@@ -132,8 +157,24 @@ class _MyWidgetState extends State<FinalprojectDownload> {
                   ),
                 ),
                 TextButton(
-                  onPressed: () {
-                    print('Delete $title');
+                  onPressed: () async {
+                    bool? confirm =
+                        await _showConfirmationDialog(context, title);
+                    if (confirm == true) {
+                      await FirebaseFirestore.instance
+                          .collection('downloads')
+                          .doc(docId)
+                          .delete();
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Center(
+                            child: Text(
+                              'Removed from Downloads',
+                            ),
+                          ),
+                        ),
+                      );
+                    }
                   },
                   child: const Text(
                     'Delete',
@@ -145,6 +186,41 @@ class _MyWidgetState extends State<FinalprojectDownload> {
           ],
         ),
       ),
+    );
+  }
+
+  Future<bool?> _showConfirmationDialog(BuildContext context, String title) {
+    return showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text(
+            'Delete Confirmation',
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          content: Text('Do you want to delete "$title" from downloads?'),
+          actions: <Widget>[
+            TextButton(
+              style: TextButton.styleFrom(
+                  foregroundColor: Colors.white, backgroundColor: Colors.red),
+              onPressed: () {
+                Navigator.of(context).pop(false);
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                  foregroundColor: Colors.white, backgroundColor: Colors.red),
+              onPressed: () {
+                Navigator.of(context).pop(true);
+              },
+              child: const Text('Confirm'),
+            ),
+          ],
+        );
+      },
     );
   }
 }

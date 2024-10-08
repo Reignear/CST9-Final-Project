@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:second_application/Component/Project_DesignComponent.dart';
-import 'package:second_application/FinalProject/useless/FinalProject_UI_Methods.dart';
 
 class FinalprojectUpcoming extends StatefulWidget {
   const FinalprojectUpcoming({super.key});
@@ -23,14 +22,14 @@ class _MyWidgetState extends State<FinalprojectUpcoming> {
             child: Column(
               children: [
                 Image.asset(
-                  'assets/image.jpg',
+                  'assets/pride.jpg',
                   width: double.infinity,
                   height: 250,
                   fit: BoxFit.cover,
                 ),
                 const SizedBox(height: 10),
                 const Text(
-                  'Blue Box',
+                  'Pride and Passion',
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
@@ -39,15 +38,15 @@ class _MyWidgetState extends State<FinalprojectUpcoming> {
                 ),
                 const SizedBox(height: 10),
                 const Text(
-                  'New Episode Coming October 3',
+                  'Clara DeVine',
                   style: TextStyle(
                     fontSize: 18,
                     color: Colors.white70,
                   ),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 15),
                 const Text(
-                  'Badminton player Taiki has always admired basketball star Chinatsu from afar. But one spring day, a surprising turn brings them unexpectedly close.',
+                  'Clara DeVine’s Pride and Passion is a sweeping romance set in the bustling streets of New York City. Following the lives of two lovers, Alex and Sam, the novel explores their journey through love, heartbreak, and resilience in a society that isn’t always accepting. With the backdrop of the LGBTQ+ rights movement, the book shines a light on the beauty of love in its many forms and the importance of fighting for it. Passionate, raw, and deeply moving, this book is a testament to the power of unity and authenticity.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 16,
@@ -66,14 +65,14 @@ class _MyWidgetState extends State<FinalprojectUpcoming> {
             child: Column(
               children: [
                 Image.asset(
-                  'assets/pavola.jpg',
+                  'assets/stereotype.jpg',
                   width: double.infinity,
                   height: 250,
                   fit: BoxFit.cover,
                 ),
                 const SizedBox(height: 10),
                 const Text(
-                  'The Boy and The Heron',
+                  'Breaking the Stereotype',
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
@@ -82,10 +81,19 @@ class _MyWidgetState extends State<FinalprojectUpcoming> {
                 ),
                 const SizedBox(height: 10),
                 const Text(
-                  'Now Streaming',
+                  'Raj Malhotra',
                   style: TextStyle(
                     fontSize: 18,
                     color: Colors.white70,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  'In Breaking the Stereotype, Raj Malhotra tackles the rigid perceptions and biases society places on individuals based on their gender, appearance, and lifestyle. This book features interviews, personal anecdotes, and a collection of real-life stories from people around the world who have faced stereotyping head-on. Through engaging storytelling, it highlights the dangers of pigeonholing people and the necessity of breaking free from society’s harmful labels.',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white54,
                   ),
                 ),
               ],
@@ -100,14 +108,14 @@ class _MyWidgetState extends State<FinalprojectUpcoming> {
             child: Column(
               children: [
                 Image.asset(
-                  'assets/pavola.jpg',
+                  'assets/rainbow.jpg',
                   width: double.infinity,
                   height: 250,
                   fit: BoxFit.cover,
                 ),
                 const SizedBox(height: 10),
                 const Text(
-                  'The Boy and The Heron',
+                  'The Rainbow Within',
                   style: TextStyle(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
@@ -116,10 +124,19 @@ class _MyWidgetState extends State<FinalprojectUpcoming> {
                 ),
                 const SizedBox(height: 10),
                 const Text(
-                  'Now Streaming',
+                  'Lila Henderson',
                   style: TextStyle(
                     fontSize: 18,
                     color: Colors.white70,
+                  ),
+                ),
+                const SizedBox(height: 15),
+                const Text(
+                  "The Rainbow Within tells the story of Emma, a young woman navigating her journey through self-discovery, identity, and love. Set in a small, conservative town, Emma learns the importance of self-acceptance and how love knows no boundaries. This heartwarming novel explores the struggles of coming out, societal pressure, and finding solace in embracing one's true self. With poignant relationships and emotional twists, The Rainbow Within is a powerful narrative of courage and hope.",
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: Colors.white54,
                   ),
                 ),
               ],

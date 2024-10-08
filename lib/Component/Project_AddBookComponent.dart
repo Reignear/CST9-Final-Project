@@ -94,7 +94,7 @@ class _MyWidgetState extends State<ProjectAddbookcomponent> {
     return Dialog(
       child: Container(
         width: 800,
-        height: 700,
+        height: 650,
         padding: const EdgeInsets.fromLTRB(30, 0, 30, 0),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -187,7 +187,44 @@ class _MyWidgetState extends State<ProjectAddbookcomponent> {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 TextButton(
-                  onPressed: uploadFile,
+                  onPressed: () async {
+                    bool? confirmed = await showDialog<bool>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text(
+                            'Confirm Upload',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          content:
+                              Text('Are you sure you want to upload the book?'),
+                          actions: <Widget>[
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                  foregroundColor: Colors.white,
+                                  backgroundColor: Colors.red),
+                              onPressed: () {
+                                Navigator.of(context).pop(false);
+                              },
+                              child: Text('Cancel'),
+                            ),
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                  foregroundColor: Colors.white,
+                                  backgroundColor: Colors.red),
+                              onPressed: () {
+                                Navigator.of(context).pop(true);
+                              },
+                              child: Text('Confirm'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+                    if (confirmed == true) {
+                      uploadFile();
+                    }
+                  },
                   child: Text(
                     'Add',
                     style: TextStyle(fontSize: 16, color: Colors.white),
@@ -204,7 +241,7 @@ class _MyWidgetState extends State<ProjectAddbookcomponent> {
                   onPressed: () {
                     Navigator.of(context).pop();
                   },
-                  child: const Text(
+                  child: Text(
                     'Close',
                     style: TextStyle(fontSize: 16, color: Colors.white),
                   ),

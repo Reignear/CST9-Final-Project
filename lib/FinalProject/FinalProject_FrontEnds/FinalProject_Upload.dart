@@ -1,12 +1,11 @@
+// ignore_for_file: avoid_print
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:second_application/Component/Project_DesignComponent.dart';
 import 'package:second_application/FinalProject/FinalProject_FrontEnds/FinalProject_EditBook.dart';
-import 'package:second_application/FinalProject/useless/FinalProject_Home.dart';
-import 'package:second_application/FinalProject/useless/FinalProject_UI_Methods.dart';
-import 'package:second_application/FinalProject/useless/FinalProject_AddMethods.dart';
 
 class FinalprojectUpload extends StatefulWidget {
   const FinalprojectUpload({super.key});
@@ -18,8 +17,6 @@ class FinalprojectUpload extends StatefulWidget {
 class _MyWidgetState extends State<FinalprojectUpload> {
   List<Map<String, dynamic>> uploadItems = [];
   bool isLoading = true;
-
-  late List<bool> _checkedStates;
 
   @override
   void initState() {
@@ -208,7 +205,39 @@ class _MyWidgetState extends State<FinalprojectUpload> {
           ),
           TextButton(
             onPressed: () {
-              deleteBook(uploadItems[index]['documentId'], index);
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text(
+                      'Confirm Deletion',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    content: Text('Are you sure you want to delete this book?'),
+                    actions: [
+                      TextButton(
+                        style: TextButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            backgroundColor: Colors.red),
+                        onPressed: () {
+                          deleteBook(uploadItems[index]['documentId'], index);
+                          Navigator.of(context).pop();
+                        },
+                        child: Text('Yes'),
+                      ),
+                      TextButton(
+                        style: TextButton.styleFrom(
+                            foregroundColor: Colors.white,
+                            backgroundColor: Colors.red),
+                        onPressed: () {
+                          Navigator.of(context).pop();
+                        },
+                        child: Text('No'),
+                      ),
+                    ],
+                  );
+                },
+              );
             },
             child: const Icon(
               Icons.delete,

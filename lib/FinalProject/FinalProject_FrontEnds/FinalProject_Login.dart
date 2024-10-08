@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:second_application/FinalProject/FinalProject_Backends/FinalProject_FireStoreService.dart';
 import 'package:second_application/FinalProject/FinalProject_Backends/FinalProject_RegistrationAuthentication.dart';
 import 'package:second_application/FinalProject/FinalProject_Backends/FinalProject_LoginAuthentication.dart';
 import 'package:second_application/FinalProject/FinalProject_FrontEnds/FinalProject_Home(1).dart';
-import 'package:second_application/FinalProject/useless/FinalProject_Home.dart';
 
 class FinalprojectLogin extends StatefulWidget {
   const FinalprojectLogin({super.key});
@@ -13,7 +11,6 @@ class FinalprojectLogin extends StatefulWidget {
 }
 
 class _FinalprojectLoginState extends State<FinalprojectLogin> {
-  //try
   final Registration_Authentication = AuthService();
   final Login_Authentication = LoginService();
 
@@ -373,17 +370,22 @@ class _FinalprojectLoginState extends State<FinalprojectLogin> {
           _login_email_controller.text, _login_password_controller.text);
 
       if (loginUser != null) {
+        // ignore: avoid_print
         print("User ID: ${loginUser.uid}");
         Navigator.pushReplacement(
+          // ignore: use_build_context_synchronously
           context,
           MaterialPageRoute(builder: (context) => MainPage()),
         );
       } else {
+        // ignore: use_build_context_synchronously
         _showLoginUnsuccessModal(context);
         return false;
       }
     } catch (e) {
+      // ignore: avoid_print
       print("Login error: $e");
+      // ignore: use_build_context_synchronously
       _showLoginUnsuccessModal(context);
     }
   }

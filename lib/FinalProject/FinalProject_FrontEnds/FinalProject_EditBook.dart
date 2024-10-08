@@ -5,6 +5,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:second_application/Component/Project_DesignComponent.dart';
 
 class FinalprojectEditbook extends StatefulWidget {
   final String documentId;
@@ -155,10 +156,8 @@ class _FinalprojectEditbookState extends State<FinalprojectEditbook> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Edit Book'),
-        actions: [IconButton(onPressed: uploadFile, icon: Icon(Icons.save))],
-      ),
+      appBar: navigation(showAddBoolBTN: false).AppBarWidget(context),
+      drawer: navigation(showAddBoolBTN: false).drawerWidget(context),
       body: _editBookBody(context),
     );
   }
@@ -237,7 +236,53 @@ class _FinalprojectEditbookState extends State<FinalprojectEditbook> {
               SizedBox(
                 width: 100,
                 child: TextButton(
-                  onPressed: uploadFile,
+                  onPressed: () async {
+                    final shouldUpload = await showDialog<bool>(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return AlertDialog(
+                          title: Text(
+                            'Confirm Edit',
+                            style: TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                          content:
+                              Text('Are you sure you want to edit the book?'),
+                          actions: <Widget>[
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                  foregroundColor: Colors.white,
+                                  backgroundColor: Colors.red),
+                              onPressed: () {
+                                Navigator.of(context).pop(false);
+                              },
+                              child: Text('Cancel'),
+                            ),
+                            TextButton(
+                              style: TextButton.styleFrom(
+                                  foregroundColor: Colors.white,
+                                  backgroundColor: Colors.red),
+                              onPressed: () {
+                                Navigator.of(context).pop(true);
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  SnackBar(
+                                    content: Text(
+                                      'Changes saved successfully!',
+                                      textAlign: TextAlign.center,
+                                    ),
+                                  ),
+                                );
+                              },
+                              child: Text('Save'),
+                            ),
+                          ],
+                        );
+                      },
+                    );
+
+                    if (shouldUpload == true) {
+                      await uploadFile();
+                    } else {}
+                  },
                   child: const Text(
                     'Save',
                     style: TextStyle(fontSize: 16, color: Colors.white),
@@ -256,6 +301,14 @@ class _FinalprojectEditbookState extends State<FinalprojectEditbook> {
                 child: TextButton(
                   onPressed: () {
                     Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Book edit cancelled!',
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    );
                   },
                   child: const Text(
                     'Cancel',

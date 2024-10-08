@@ -29,7 +29,7 @@ class MyApp extends StatelessWidget {
     return const MaterialApp(
       debugShowCheckedModeBanner: false,
       home: FinalprojectLogin(),
-      //flutter run -d chrome --web-renderer html
+      // flutter run -d chrome --web-renderer html
     );
   }
 
