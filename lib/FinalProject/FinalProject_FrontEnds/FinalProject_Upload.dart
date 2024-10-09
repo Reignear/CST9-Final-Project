@@ -83,7 +83,11 @@ class _MyWidgetState extends State<FinalprojectUpload> {
       });
 
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Book and image deleted successfully.')),
+        SnackBar(
+            content: Text(
+          'Book deleted successfully.',
+          textAlign: TextAlign.center,
+        )),
       );
     } catch (e) {
       print('Error deleting book or image: $e');

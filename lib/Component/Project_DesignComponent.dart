@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:second_application/Component/Project_AddBookComponent.dart';
 import 'package:second_application/FinalProject/FinalProject_Backends/FinalProject_SignOut.dart';
+import 'package:second_application/FinalProject/FinalProject_FrontEnds/FinalProject_Finished.dart';
 import 'package:second_application/FinalProject/FinalProject_FrontEnds/FinalProject_Upload.dart';
 import 'package:second_application/FinalProject/FinalProject_FrontEnds/FinalProject_Download.dart';
 import 'package:second_application/FinalProject/FinalProject_FrontEnds/FinalProject_Favorite.dart';
@@ -130,7 +131,9 @@ class navigation extends StatelessWidget {
               const FinalprojectFavorite()),
           _buildDrawerItem(context, Icons.event_note, 'Upcoming',
               const FinalprojectUpcoming()),
-          const SizedBox(height: 250),
+          _buildDrawerItem(context, Icons.book_sharp, 'Finished Books',
+              const FinalprojectFinished()),
+          const SizedBox(height: 200),
           ListTile(
             leading: const Icon(Icons.logout, color: Colors.red),
             title: const Text('Log Out', style: TextStyle(color: Colors.white)),

@@ -1,7 +1,12 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:second_application/FinalProject/FinalProject_FrontEnds/FinalProject_Home(1).dart';
 
-class FinalprojectReadbook extends StatelessWidget {
+class FinalprojectReadbook extends StatefulWidget {
   final String bookTitle;
   final String bookAuthor;
   final String bookStory;
@@ -13,6 +18,11 @@ class FinalprojectReadbook extends StatelessWidget {
     required this.bookUrl,
   });
 
+  @override
+  State<FinalprojectReadbook> createState() => _FinalprojectReadbookState();
+}
+
+class _FinalprojectReadbookState extends State<FinalprojectReadbook> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -27,17 +37,17 @@ class FinalprojectReadbook extends StatelessWidget {
                   width: 150,
                   height: 200,
                   margin: const EdgeInsets.fromLTRB(0, 20, 0, 20),
-                  child: Image.network(bookUrl),
+                  child: Image.network(widget.bookUrl),
                 ),
               ),
               Text(
-                bookTitle,
+                widget.bookTitle,
                 style: GoogleFonts.gowunBatang(
                     fontWeight: FontWeight.bold, fontSize: 20),
                 textAlign: TextAlign.center,
               ),
               Text(
-                bookAuthor,
+                widget.bookAuthor,
                 style: GoogleFonts.gowunBatang(
                     fontWeight: FontWeight.w800, fontSize: 15),
                 textAlign: TextAlign.center,
@@ -46,18 +56,80 @@ class FinalprojectReadbook extends StatelessWidget {
                 height: 50,
               ),
               Padding(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 16.0), // Adjust horizontal padding
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Container(
-                  alignment: Alignment.topLeft, // Align text to the left
+                  alignment: Alignment.topLeft,
                   child: Text(
-                    bookStory,
+                    widget.bookStory,
                     style: GoogleFonts.gowunBatang(
                       fontWeight: FontWeight.w700,
                     ),
                     textAlign: TextAlign.center,
                   ),
                 ),
+              ),
+              SizedBox(
+                height: 50,
+              ),
+              Container(
+                decoration: BoxDecoration(
+                    border: Border.all(color: Colors.red),
+                    borderRadius: BorderRadius.circular(20)),
+                child: TextButton(
+                    onPressed: () async {
+                      User? user = FirebaseAuth.instance.currentUser;
+                      if (user != null) {
+                        String userId = user.uid;
+
+                        try {
+                          QuerySnapshot getBookDetails = await FirebaseFirestore
+                              .instance
+                              .collection('books')
+                              .where('bookTitle', isEqualTo: widget.bookTitle)
+                              .where('bookAuthor', isEqualTo: widget.bookAuthor)
+                              .get();
+
+                          if (getBookDetails.docs.isNotEmpty) {
+                            var bookDetails = getBookDetails.docs.first.data()
+                                as Map<String, dynamic>;
+                            await FirebaseFirestore.instance
+                                .collection('finished')
+                                .add({
+                              'finished_userId': userId,
+                              'finished_bookID': bookDetails['bookID'],
+                              'finished_bookTitle': bookDetails['bookTitle'],
+                              'finished_bookAuthor': bookDetails['bookAuthor'],
+                              'finished_bookDescription':
+                                  bookDetails['bookDescription'],
+                              'finished_bookStory': bookDetails['bookStory'],
+                              'finished_filePath': bookDetails['filePath'],
+                              'finished_imageUrl': bookDetails['imageUrl'],
+                              'finished_bookUploader': bookDetails['userId'],
+                            });
+
+                            // ignore: use_build_context_synchronously
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                  content: Text(
+                                'Book added to Finished',
+                                textAlign: TextAlign.center,
+                              )),
+                            );
+                            Navigator.of(context).pop();
+                          } else {}
+                        } catch (a) {
+                          print(a);
+                        }
+                      }
+                      setState(() {});
+                    },
+                    child: Text(
+                      'Finish reading',
+                      style: TextStyle(color: Colors.black),
+                    )),
+              ),
+              SizedBox(
+                height: 20,
               ),
             ],
           ),

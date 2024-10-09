@@ -419,7 +419,7 @@ class _ProjectHomeComponentState extends State<ProjectHomeComponent> {
                               SnackBar(
                                   content: Center(
                                       child: Text(
-                                          'Failed to toggle favorite: $e'))),
+                                          'Failed to toggle donwloads: $e'))),
                             );
                           }
                         }

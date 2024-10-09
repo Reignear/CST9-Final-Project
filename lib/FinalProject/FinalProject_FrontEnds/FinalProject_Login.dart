@@ -115,7 +115,7 @@ class _FinalprojectLoginState extends State<FinalprojectLogin> {
                         _showRegistrationModal(context);
                       },
                       child: const Text(
-                        'New to Netflix? Sign up now.',
+                        'New to Incredi-Book? Sign up now.',
                         style: TextStyle(color: Colors.white),
                       ),
                     ),
