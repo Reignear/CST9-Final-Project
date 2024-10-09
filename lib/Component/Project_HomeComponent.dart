@@ -17,6 +17,9 @@ class ProjectHomeComponent extends StatefulWidget {
 class _ProjectHomeComponentState extends State<ProjectHomeComponent> {
   Stream<QuerySnapshot>? bookStream;
 
+  TextEditingController _searchfield_controller = TextEditingController();
+  String searchQuery = "";
+
   Future<void> fetchBooks() async {
     bookStream = await DatabaseService().getBookDetails();
     setState(() {});
@@ -28,81 +31,148 @@ class _ProjectHomeComponentState extends State<ProjectHomeComponent> {
     fetchBooks();
   }
 
-  // Displaying books in a grid format hahahaha
-  Widget displayBooks() {
-    return StreamBuilder<QuerySnapshot>(
-      stream: bookStream,
-      builder: (context, snapshot) {
-        if (snapshot.connectionState == ConnectionState.waiting) {
-          return Center(child: CircularProgressIndicator());
-        }
-        if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        }
-        if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-          return Center(child: Text('No books found'));
-        }
+  @override
+  void dispose() {
+    _searchfield_controller.dispose();
+    super.dispose();
+  }
 
-        return GridView.builder(
-          padding: EdgeInsets.all(15),
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 3,
-            childAspectRatio: 0.575,
-            crossAxisSpacing: 15.0,
-            mainAxisSpacing: 15.0,
-          ),
-          itemCount: snapshot.data!.docs.length,
-          itemBuilder: (context, index) {
-            DocumentSnapshot documentSnap = snapshot.data!.docs[index];
-            return GestureDetector(
-              onTap: () {
-                _showBookDialog(
-                    context, documentSnap.data() as Map<String, dynamic>);
-              },
-              child: Material(
-                color: Colors.transparent,
-                elevation: 4.0,
-                child: Column(
-                  children: [
-                    Container(
-                      padding: EdgeInsets.fromLTRB(15, 15, 15, 5),
-                      child: Container(
-                        height: 180,
-                        decoration: BoxDecoration(
-                          color: const Color.fromARGB(255, 255, 255, 255),
-                          image: DecorationImage(
-                            image: NetworkImage(documentSnap['imageUrl']),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
+  Widget displayBooks() {
+    return Column(
+      children: [
+        Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: SizedBox(
+            width: 350.0,
+            child: Theme(
+              data: Theme.of(context).copyWith(
+                inputDecorationTheme: InputDecorationTheme(
+                  hintStyle: TextStyle(color: Colors.white),
+                  labelStyle: TextStyle(color: Colors.white),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15.0),
+                    borderSide: BorderSide(
+                      color: Colors.red,
+                      width: 2.0,
                     ),
-                    Text(
-                      documentSnap['bookTitle'],
-                      style: GoogleFonts.gowunBatang(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 12,
-                        color: Colors.white,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      documentSnap['bookAuthor'],
-                      style: GoogleFonts.gowunBatang(
-                        fontWeight: FontWeight.normal,
-                        fontSize: 10,
-                        color: Colors.white,
-                      ),
-                      textAlign: TextAlign.center,
-                    ),
-                  ],
+                  ),
                 ),
               ),
-            );
-          },
-        );
-      },
+              child: TextField(
+                style: TextStyle(color: Colors.white),
+                controller: _searchfield_controller,
+                decoration: InputDecoration(
+                  labelText: 'Search Books',
+                  suffixIcon: Icon(Icons.search, color: Colors.white),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15.0),
+                    borderSide: BorderSide(
+                      color: Colors.red,
+                    ),
+                  ),
+                ),
+                onChanged: (value) {
+                  setState(() {
+                    searchQuery = value.toLowerCase();
+                  });
+                },
+              ),
+            ),
+          ),
+        ),
+        Expanded(
+          child: StreamBuilder<QuerySnapshot>(
+            stream: bookStream,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(child: CircularProgressIndicator());
+              }
+              if (snapshot.hasError) {
+                return Center(child: Text('Error: ${snapshot.error}'));
+              }
+              if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                return Center(child: Text('No books found'));
+              }
+
+              var filteredBooks = snapshot.data!.docs.where((book) {
+                var title = (book['bookTitle'] as String).toLowerCase();
+                var author = (book['bookAuthor'] as String).toLowerCase();
+                return title.contains(searchQuery.toLowerCase()) ||
+                    author.contains(searchQuery.toLowerCase());
+              }).toList();
+
+              if (filteredBooks.isEmpty) {
+                return Center(
+                    child: Text(
+                  'No books match your search',
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.bold),
+                ));
+              }
+
+              return GridView.builder(
+                padding: EdgeInsets.all(15),
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 3,
+                  childAspectRatio: 0.575,
+                  crossAxisSpacing: 15.0,
+                  mainAxisSpacing: 15.0,
+                ),
+                itemCount: filteredBooks.length,
+                itemBuilder: (context, index) {
+                  DocumentSnapshot documentSnap = filteredBooks[index];
+                  return GestureDetector(
+                    onTap: () {
+                      _showBookDialog(
+                          context, documentSnap.data() as Map<String, dynamic>);
+                    },
+                    child: Material(
+                      color: Colors.transparent,
+                      elevation: 4.0,
+                      child: Column(
+                        children: [
+                          Container(
+                            padding: EdgeInsets.fromLTRB(15, 15, 15, 5),
+                            child: Container(
+                              height: 180,
+                              decoration: BoxDecoration(
+                                color: const Color.fromARGB(255, 255, 255, 255),
+                                image: DecorationImage(
+                                  image: NetworkImage(documentSnap['imageUrl']),
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                            ),
+                          ),
+                          Text(
+                            documentSnap['bookTitle'],
+                            style: GoogleFonts.gowunBatang(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                              color: Colors.white,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          SizedBox(height: 4),
+                          Text(
+                            documentSnap['bookAuthor'],
+                            style: GoogleFonts.gowunBatang(
+                              fontWeight: FontWeight.normal,
+                              fontSize: 10,
+                              color: Colors.white,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 

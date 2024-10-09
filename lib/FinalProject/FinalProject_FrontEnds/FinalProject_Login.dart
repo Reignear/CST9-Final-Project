@@ -111,27 +111,6 @@ class _FinalprojectLoginState extends State<FinalprojectLogin> {
                     ),
                     const SizedBox(height: 20),
                     TextButton(
-                      onPressed: () {},
-                      child: const Text(
-                        'Forgot password?',
-                        style: TextStyle(color: Colors.white),
-                      ),
-                    ),
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Checkbox(
-                          value: true,
-                          onChanged: (value) {},
-                          activeColor: Colors.red,
-                        ),
-                        const Text(
-                          'Remember me',
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      ],
-                    ),
-                    TextButton(
                       onPressed: () {
                         _showRegistrationModal(context);
                       },

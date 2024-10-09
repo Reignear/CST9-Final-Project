@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:uuid/uuid.dart';
 
 class ProjectAddbookcomponent extends StatefulWidget {
@@ -145,7 +146,9 @@ class _MyWidgetState extends State<ProjectAddbookcomponent> {
             const SizedBox(height: 5),
             TextField(
               controller: _titleController,
-              decoration: const InputDecoration(labelText: 'Book Title'),
+              decoration: const InputDecoration(
+                labelText: 'Book Title',
+              ),
             ),
             const SizedBox(height: 5),
             TextField(
