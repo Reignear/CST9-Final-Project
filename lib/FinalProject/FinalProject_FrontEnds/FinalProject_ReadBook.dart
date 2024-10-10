@@ -1,10 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:second_application/FinalProject/FinalProject_FrontEnds/FinalProject_Home(1).dart';
 
 class FinalprojectReadbook extends StatefulWidget {
   final String bookTitle;
@@ -82,6 +80,7 @@ class _FinalprojectReadbookState extends State<FinalprojectReadbook> {
                         String userId = user.uid;
 
                         try {
+                          // Fetch the book details
                           QuerySnapshot getBookDetails = await FirebaseFirestore
                               .instance
                               .collection('books')
@@ -92,33 +91,54 @@ class _FinalprojectReadbookState extends State<FinalprojectReadbook> {
                           if (getBookDetails.docs.isNotEmpty) {
                             var bookDetails = getBookDetails.docs.first.data()
                                 as Map<String, dynamic>;
-                            await FirebaseFirestore.instance
-                                .collection('finished')
-                                .add({
-                              'finished_userId': userId,
-                              'finished_bookID': bookDetails['bookID'],
-                              'finished_bookTitle': bookDetails['bookTitle'],
-                              'finished_bookAuthor': bookDetails['bookAuthor'],
-                              'finished_bookDescription':
-                                  bookDetails['bookDescription'],
-                              'finished_bookStory': bookDetails['bookStory'],
-                              'finished_filePath': bookDetails['filePath'],
-                              'finished_imageUrl': bookDetails['imageUrl'],
-                              'finished_bookUploader': bookDetails['userId'],
-                            });
 
-                            // ignore: use_build_context_synchronously
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                  content: Text(
-                                'Book added to Finished',
-                                textAlign: TextAlign.center,
-                              )),
-                            );
-                            Navigator.of(context).pop();
+                            // Check if the book is already marked as finished by the user
+                            QuerySnapshot finishedBooks =
+                                await FirebaseFirestore.instance
+                                    .collection('finished')
+                                    .where('finished_userId', isEqualTo: userId)
+                                    .where('finished_bookID',
+                                        isEqualTo: bookDetails['bookID'])
+                                    .get();
+
+                            if (finishedBooks.docs.isEmpty) {
+                              // Book is not yet marked as finished, add to "finished"
+                              await FirebaseFirestore.instance
+                                  .collection('finished')
+                                  .add({
+                                'finished_userId': userId,
+                                'finished_bookID': bookDetails['bookID'],
+                                'finished_bookTitle': bookDetails['bookTitle'],
+                                'finished_bookAuthor':
+                                    bookDetails['bookAuthor'],
+                                'finished_bookDescription':
+                                    bookDetails['bookDescription'],
+                                'finished_bookStory': bookDetails['bookStory'],
+                                'finished_filePath': bookDetails['filePath'],
+                                'finished_imageUrl': bookDetails['imageUrl'],
+                                'finished_bookUploader': bookDetails['userId'],
+                              });
+
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content: Text(
+                                  'Book added to Finished',
+                                  textAlign: TextAlign.center,
+                                )),
+                              );
+                              Navigator.of(context).pop();
+                            } else {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                    content: Text(
+                                  'Book already marked as Finished',
+                                  textAlign: TextAlign.center,
+                                )),
+                              );
+                            }
                           } else {}
-                        } catch (a) {
-                          print(a);
+                        } catch (e) {
+                          print(e);
                         }
                       }
                       setState(() {});

@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:second_application/Component/Project_DesignComponent.dart';
-import 'package:second_application/FinalProject/FinalProject_FrontEnds/FinalProject_ReadBook.dart';
 
 class FinalprojectFinished extends StatefulWidget {
   const FinalprojectFinished({super.key});
