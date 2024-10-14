@@ -1,6 +1,6 @@
-# second_application
+# CST9 - Final Project
 
-A new Flutter project.
+A open source book application where users cam upload and read books.
 
 ## Getting Started
 
